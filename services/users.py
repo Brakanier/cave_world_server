@@ -1,6 +1,10 @@
 import uuid
+import datetime
 
-from models import User
+from tortoise.transactions import atomic
+
+from models import User, UserData, UserDataPydanic
+
 
 class Users:
     def __init__(self):
@@ -19,13 +23,19 @@ class Users:
 
         return user
 
-
-
     async def create_vk_user(self, vk_id: int):
         token = await self.gen_token()
-        return await User.create(vk_id=vk_id, token=token)
-
-
+        user = await User.create(vk_id=vk_id, token=token)
+        await UserData.create(user=user, time=int(datetime.datetime.utcnow().timestamp()))
+        return user
 
     async def gen_token(self):
         return str(uuid.uuid4())
+    
+    @atomic()
+    async def get_user_data(self, token):
+        user_data = await UserData.filter(user__token=token).get()
+        await user_data.processing()
+        await user_data.save()
+        return await UserDataPydanic.from_tortoise_orm(user_data)
+        

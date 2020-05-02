@@ -46,6 +46,8 @@ async def read_root():
     print(test)
     print(int(time.time()))
 
+game_service = services.Game()
+user_service = services.Users()
 
 #vk_user_id: int, vk_app_id: int, vk_is_app_user: bool, vk_are_notifications_enabled: bool, vk_language: str, vk_ref: str, vk_access_token_settings: str
 @app.get('/login/vk')
@@ -55,13 +57,22 @@ async def login(r: Request, vk_user_id: int):
     if is_valid == False:
         raise HTTPException(401, 'Unauthorized')
     
-    user_service = services.Users()
+    
     user = await user_service.get_or_create_vk(vk_user_id)
+    return user.token
+
+@app.get('/login/test')
+async def login_test(vk_id: str):
+    user = await user_service.get_or_create_vk(vk_id)
     return user.token
 
 @app.get('/data')
 async def data(token: str = Depends(token_auth)):
-    pass
+    return await user_service.get_user_data(token)
+
+@app.get('/extract/{target}')
+async def extract(target: str, token: str = Depends(token_auth)):
+    return await game_service.action(token, target)
 
 register_tortoise(
     app,
