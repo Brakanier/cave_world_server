@@ -74,6 +74,14 @@ async def data(token: str = Depends(token_auth)):
 async def extract(target: str, token: str = Depends(token_auth)):
     return await game_service.action(token, target)
 
+@app.get('/build/{target}')
+async def build(target: str, token: str = Depends(token_auth)):
+    return await game_service.action(token, target)
+
+@app.get('/citizen/{target}/{amount}')
+async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
+    return await game_service.action(token, target, amount)
+
 register_tortoise(
     app,
     db_url=config.DB_URL,
