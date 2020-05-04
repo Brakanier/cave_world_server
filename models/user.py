@@ -7,7 +7,6 @@ class User(models.Model):
     vk_id = fields.IntField(unique=True, index=True)
     token = fields.CharField(512, unique=True)
     created = fields.DatetimeField(auto_now_add=True)
+    data = fields.ReverseRelation["UserData"]
     
-
-
 UserPydanic = pydantic_model_creator(User, name="User", exclude=['token'])

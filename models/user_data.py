@@ -19,8 +19,8 @@ class UserData(models.Model):
 
     wood = fields.FloatField(default=0)
     stone = fields.FloatField(default=0)
-    ore = fields.FloatField(default=0)
 
+    ore = fields.FloatField(default=0)
     iron = fields.FloatField(default=0)
     orb = fields.FloatField(default=0)
     alchemy = fields.FloatField(default=0)
@@ -37,11 +37,16 @@ class UserData(models.Model):
     alchemist_inwork = fields.IntField(default=0)
 
     ## Армия
-    warrior = fields.IntField(default=0)
-    archer = fields.IntField(default=0)
-    warlock = fields.IntField(default=0)
+    warrior_inwork = fields.IntField(default=0)
+    archer_inwork = fields.IntField(default=0)
+    warlock_inwork = fields.IntField(default=0)
 
     # Здания
+    ## Армия
+    warrior_work = fields.IntField(default=0)
+    archer_work = fields.IntField(default=0)
+    warlock_work = fields.IntField(default=0)
+
     ## Добыча
     wood_work = fields.IntField(default=0)
     stone_work = fields.IntField(default=0)
@@ -70,9 +75,6 @@ class UserData(models.Model):
     def stone_max(self) -> int:
         return 100 + 100 * self.stone_store
 
-    def ore_max(self) -> int:
-        return 100 + 100 * self.ore_store
-
     def citizens_max(self) -> int:
         return 1 * self.hut + 5 * self.house + 10 * self.mansion
 
@@ -85,10 +87,30 @@ class UserData(models.Model):
             - self.smith_inwork
             - self.wizard_inwork
             - self.alchemist_inwork
-            - self.warrior
-            - self.archer
-            - self.warlock
+            - self.warrior_inwork
+            - self.archer_inwork
+            - self.warlock_inwork
         )
+
+    def terrain_free(self) -> int:
+        return (
+            self.terrain
+            - self.hut
+            - self.house
+            - self.mansion
+            - self.wood_store
+            - self.stone_store
+            - self.ore_store
+            - self.wood_work
+            - self.stone_work
+            - self.ore_work
+            - self.smith_work
+            - self.wizard_work
+            - self.alchemist_work
+        )
+    
+    def warrior_max(self) -> int:
+        return 5 * self.warrior_work
 
     async def processing(self):
         current = int(datetime.datetime.utcnow().timestamp())
@@ -108,12 +130,21 @@ class UserData(models.Model):
             self.wood = min(self.wood + tics * 0.2 * self.wood_inwork, self.wood_max())
 
         if self.stone_inwork and self.stone < self.stone_max():
-            self.stone = min(self.stone + tics * 0.2 * self.stone_inwork, self.stone_max())
+            self.stone = min(
+                self.stone + tics * 0.2 * self.stone_inwork, self.stone_max()
+            )
 
         self.time = current
 
     class PydanticMeta:
-        computed = ["energy_max", "wood_max", "stone_max", "ore_max", "citizens_max", "citizens_free"]
+        computed = [
+            "terrain_free",
+            "energy_max",
+            "wood_max",
+            "stone_max",
+            "citizens_max",
+            "citizens_free",
+        ]
         exclude = ["id", "time"]
 
 

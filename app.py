@@ -82,6 +82,15 @@ async def build(target: str, token: str = Depends(token_auth)):
 async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
     return await game_service.action(token, target, amount)
 
+@app.get('/find')
+async def find_enemies(token: str = Depends(token_auth)):
+    return await game_service.find()
+
+@app.get('/attack/{enemy_id}')
+async def attack(enemy_id: int, token: str = Depends(token_auth)):
+    return await game_service.attack(token, enemy_id)
+
+
 register_tortoise(
     app,
     db_url=config.DB_URL,
