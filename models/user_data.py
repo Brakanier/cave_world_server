@@ -12,7 +12,7 @@ class UserData(models.Model):
     time = fields.BigIntField()
 
     energy = fields.FloatField(default=30)
-    terrain = fields.FloatField(default=100)
+    terrain = fields.IntField(default=100)
 
     # Ресурсы
     gold = fields.IntField(default=0)

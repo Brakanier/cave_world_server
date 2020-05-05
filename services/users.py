@@ -38,4 +38,7 @@ class Users:
         await user_data.processing()
         await user_data.save()
         return await UserDataPydanic.from_tortoise_orm(user_data)
-        
+    
+    async def set_nickname(self, token, nickname):
+        await User.filter(token=token).update(nickname=nickname)
+        return nickname

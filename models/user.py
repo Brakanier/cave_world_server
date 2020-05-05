@@ -8,5 +8,7 @@ class User(models.Model):
     token = fields.CharField(512, unique=True)
     created = fields.DatetimeField(auto_now_add=True)
     data = fields.ReverseRelation["UserData"]
+    nickname = fields.CharField(15, null=True)
     
 UserPydanic = pydantic_model_creator(User, name="User", exclude=['token'])
+NewUserPydanic = pydantic_model_creator(User, name="NewUser", exclude=['id', 'created'])

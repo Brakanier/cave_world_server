@@ -2,8 +2,9 @@ import datetime
 
 from tortoise.expressions import F
 from tortoise.transactions import atomic
+from tortoise.query_utils import Q, Prefetch
 
-from models import User, UserData, UserDataPydanic
+from models import User, UserData, UserDataPydanic, Battle
 from .builds import Builds
 from .citizens import Citizens
 from .war import War
@@ -82,22 +83,19 @@ class Game:
         return await self.war.random_enemies()
 
     async def attack(self, token, enemy_id):
-        user = await UserData.filter(user__token=token).get()
+        user = await UserData.filter(user__token=token).prefetch_related('user').get()
         await user.processing()
-        enemy = await UserData.filter(user__id=enemy_id).get()
+        enemy = await UserData.filter(user__id=enemy_id).prefetch_related('user').get()
         await enemy.processing()
 
-        user_attack = user.warrior_inwork + user.archer_inwork + user.warlock_inwork
-        user_health = user.warrior_inwork + user.archer_inwork + user.warlock_inwork
-        
-        enemy_attack = enemy.warrior_inwork + user.archer_inwork + user.warlock_inwork
-        enemy_health = enemy.warrior_inwork + user.archer_inwork + user.warlock_inwork
+        battle = await self.war.attack(user, enemy)
+        await user.save()
+        await enemy.save()
+        return battle
 
-
-
-        await self.war.attack(user, enemy)
-        return 'ok'
-
+    async def battles(self, token):
+        user = await User.filter(token=token).get()
+        return await Battle.filter(Q(Q(attack=user), Q(defender=user), join_type='OR')).prefetch_related('attack', 'defender').all().values('data', 'reward', 'time', 'win', 'attack__vk_id', 'attack__nickname', 'defender__vk_id', 'defender__nickname')
 
     async def extract(self, user_data, target):
         if user_data.energy < 1:

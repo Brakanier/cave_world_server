@@ -59,12 +59,16 @@ async def login(r: Request, vk_user_id: int):
     
     
     user = await user_service.get_or_create_vk(vk_user_id)
-    return user.token
+    return await models.NewUserPydanic.from_tortoise_orm(user)
 
 @app.get('/login/test')
 async def login_test(vk_id: str):
     user = await user_service.get_or_create_vk(vk_id)
-    return user.token
+    return await models.NewUserPydanic.from_tortoise_orm(user)
+
+@app.get('/nickname')
+async def set_nickname(nickname: str, token: str = Depends(token_auth)):
+    return await user_service.set_nickname(token, nickname)
 
 @app.get('/data')
 async def data(token: str = Depends(token_auth)):
@@ -90,6 +94,9 @@ async def find_enemies(token: str = Depends(token_auth)):
 async def attack(enemy_id: int, token: str = Depends(token_auth)):
     return await game_service.attack(token, enemy_id)
 
+@app.get('/battles')
+async def battles(token: str = Depends(token_auth)):
+    return await game_service.battles(token)
 
 register_tortoise(
     app,
