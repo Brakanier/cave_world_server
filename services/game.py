@@ -97,6 +97,10 @@ class Game:
         user = await User.filter(token=token).get()
         return await Battle.filter(Q(Q(attack=user), Q(defender=user), join_type='OR')).prefetch_related('attack', 'defender').all().values('data', 'reward', 'time', 'win', 'attack__vk_id', 'attack__nickname', 'defender__vk_id', 'defender__nickname')
 
+
+    async def level_up(self, token):
+        return 'ok'
+
     async def extract(self, user_data, target):
         if user_data.energy < 1:
             return None
@@ -105,5 +109,6 @@ class Game:
             return None
 
         user_data.energy -= 1
+        user_data.exp += 1
 
         setattr(user_data, target, getattr(user_data, target) + 1)

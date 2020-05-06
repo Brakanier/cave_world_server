@@ -11,6 +11,9 @@ class UserData(models.Model):
     user = fields.OneToOneField("models.User", related_name="data")
     time = fields.BigIntField()
 
+    exp = fields.BigIntField(default=0)
+    level = fields.IntField(default=1)
+
     energy = fields.FloatField(default=30)
     terrain = fields.IntField(default=100)
 
@@ -65,6 +68,12 @@ class UserData(models.Model):
     hut = fields.IntField(default=0)
     house = fields.IntField(default=0)
     mansion = fields.IntField(default=0)
+
+    def current_exp(self) -> int:
+        return self.exp - sum([lvl * 10 for lvl in range(self.level)])
+    
+    def need_exp(self) -> int:
+        return sum([lvl * 10 for lvl in range(self.level + 1)])
 
     def energy_max(self) -> int:
         return 30
@@ -136,8 +145,11 @@ class UserData(models.Model):
 
         self.time = current
 
+
     class PydanticMeta:
         computed = [
+            "current_exp",
+            "need_exp",
             "terrain_free",
             "energy_max",
             "wood_max",

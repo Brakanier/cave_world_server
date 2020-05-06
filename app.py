@@ -70,6 +70,10 @@ async def login_test(vk_id: str):
 async def set_nickname(nickname: str, token: str = Depends(token_auth)):
     return await user_service.set_nickname(token, nickname)
 
+@app.get('/level-up')
+async def level_up(token: str = Depends(token_auth)):
+    return await game_service.level_up(token)
+
 @app.get('/data')
 async def data(token: str = Depends(token_auth)):
     return await user_service.get_user_data(token)
