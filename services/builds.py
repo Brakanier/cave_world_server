@@ -10,18 +10,21 @@ class Builds:
         if user_data.wood >= 10:
             user_data.wood -= 10
             user_data.hut += 1
+            user_data.citizens += 1
     
     async def house(self, user_data: UserData):
         if user_data.wood >= 15 and user_data.stone >= 15:
             user_data.wood -= 15
             user_data.stone -= 15
             user_data.house += 1
+            user_data.citizens += 5
     
     async def mansion(self, user_data: UserData):
         if user_data.wood >= 30 and user_data.stone >= 30:
             user_data.wood -= 30
             user_data.stone -= 30
             user_data.mansion += 1
+            user_data.citizens += 10
     
     # Склады
     async def wood_store(self, user_data: UserData):

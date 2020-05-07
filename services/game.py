@@ -82,6 +82,7 @@ class Game:
     async def find(self):
         return await self.war.random_enemies()
 
+    @atomic()
     async def attack(self, token, enemy_id):
         user = await UserData.filter(user__token=token).prefetch_related('user').get()
         await user.processing()
@@ -89,8 +90,10 @@ class Game:
         await enemy.processing()
 
         battle = await self.war.attack(user, enemy)
-        await user.save()
+
         await enemy.save()
+        await user.save()
+        
         return battle
 
     async def battles(self, token):
@@ -99,7 +102,25 @@ class Game:
 
 
     async def level_up(self, token):
-        return 'ok'
+        user = await UserData.filter(user__token=token).prefetch_related('user').get()
+        energy = 30
+        terrain = 5 * user.level
+        
+        alchemy = 5 * user.level
+        gold = 10 * user.level
+        reward = {
+            'energy': energy,
+            'alchemy': alchemy,
+            'terrain': terrain,
+            'gold': gold
+        }
+        user.energy += energy
+        user.terrain += terrain
+        user.alchemy += alchemy
+        user.gold += gold
+        user.level += 1
+        await user.save()
+        return reward
 
     async def extract(self, user_data, target):
         if user_data.energy < 1:

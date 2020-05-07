@@ -15,7 +15,6 @@ class War:
         return await UserData.all().values('terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: UserData, enemy: UserData):
-        start = datetime.datetime.utcnow().timestamp()
         # user_warrior_health = user.warrior_inwork * 30
         # user_archer_health = user.archer_inwork * 20
         # user_warlock_health = user.warlock_inwork * 10
@@ -48,10 +47,16 @@ class War:
         delta = user_army - enemy_army
         reward = None
         if delta >= 0:
+            print(user.wood)
             print('win')
             win = True
             reward = self.get_reward(enemy)
             user.terrain += reward['terrain']
+            user.trophy += reward['trophy']
+            user.wood = min(user.wood + reward['wood'], user.wood_max())
+            user.stone = min(user.stone + reward['stone'], user.stone_max())
+            user.iron += reward['iron']
+            user.orb += reward['orb']
         else:
             print('defeat')
             win = False
@@ -84,8 +89,6 @@ class War:
         enemy.archer_inwork -= enemy_archer_die
         enemy.warlock_inwork -= enemy_warlock_die
 
-
-        print(datetime.datetime.utcnow().timestamp() - start)
         battle = await Battle.create(attack=user.user, defender=enemy.user, attack_vk_id=user.user.vk_id, defender_vk_id=enemy.user.vk_id, time=int(datetime.datetime.utcnow().timestamp()), win=win, data=data, reward=reward)
         return await BattlePydanic.from_tortoise_orm(battle)
         
@@ -118,5 +121,5 @@ class War:
             'stone': random.randint(0, 30),
             'iron': random.randint(0, 10),
             'orb': random.randint(0, 10),
-            'terrain': random.randint(0, 5)
+            'terrain': random.randint(1, 5)
         }

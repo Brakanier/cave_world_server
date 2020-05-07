@@ -16,6 +16,7 @@ class UserData(models.Model):
 
     energy = fields.FloatField(default=30)
     terrain = fields.IntField(default=100)
+    trophy = fields.IntField(default=0)
 
     # Ресурсы
     gold = fields.IntField(default=0)
@@ -142,6 +143,20 @@ class UserData(models.Model):
             self.stone = min(
                 self.stone + tics * 0.2 * self.stone_inwork, self.stone_max()
             )
+        
+        if self.ore_inwork:
+            self.ore += tics * 0.2 * self.ore_inwork
+
+        if self.smith_inwork and self.ore >= 1:
+            iron = min(tics * 0.1 * self.smith_inwork, self.ore)
+            self.iron += iron
+            self.ore -= iron
+        
+        if self.wizard_inwork:
+            self.orb += tics * 0.1 * self.wizard_inwork
+        
+        if self.alchemist_inwork:
+            self.alchemy += tics * 0.1 * self.alchemist_inwork
 
         self.time = current
 
