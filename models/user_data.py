@@ -121,6 +121,12 @@ class UserData(models.Model):
     
     def warrior_max(self) -> int:
         return 5 * self.warrior_work
+    
+    def archer_max(self) -> int:
+        return 3 * self.archer_work
+    
+    def warlock_max(self) -> int:
+        return 1 * self.warlock_work
 
     async def processing(self):
         current = int(datetime.datetime.utcnow().timestamp())
@@ -171,6 +177,9 @@ class UserData(models.Model):
             "stone_max",
             "citizens_max",
             "citizens_free",
+            "warrior_max",
+            "archer_max",
+            "warlock_max"
         ]
         exclude = ["id", "time"]
 

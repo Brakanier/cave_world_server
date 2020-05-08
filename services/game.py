@@ -52,9 +52,9 @@ class Game:
         elif action == 'warrior_work':
             await self.build.warrior_work(user_data)
         elif action == 'archer_work':
-            await self.build.warrior_work(user_data)
+            await self.build.archer_work(user_data)
         elif action == 'warlock_work':
-            await self.build.warrior_work(user_data)
+            await self.build.warlock_work(user_data)
 
         elif action == 'wood_inwork':
             await self.citizen.inwork(user_data, 'wood', amount)
@@ -98,7 +98,7 @@ class Game:
 
     async def battles(self, token):
         user = await User.filter(token=token).get()
-        return await Battle.filter(Q(Q(attack=user), Q(defender=user), join_type='OR')).prefetch_related('attack', 'defender').all().values('data', 'reward', 'time', 'win', 'attack__vk_id', 'attack__nickname', 'defender__vk_id', 'defender__nickname')
+        return await Battle.filter(Q(Q(attack=user), Q(defender=user), join_type='OR')).prefetch_related('attack', 'defender').order_by('-time').all().limit(10).values('data', 'reward', 'time', 'win', 'attack__vk_id', 'attack__nickname', 'defender__vk_id', 'defender__nickname')
 
 
     async def level_up(self, token):

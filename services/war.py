@@ -12,7 +12,7 @@ class War:
         #limit = 3
         #offset = random.randint(0, count - limit)
         #return await UserPydanic.from_queryset(User.all().limit(limit).offset(offset).prefetch_related(UserData.get('terrain')))
-        return await UserData.all().values('terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        return await UserData.all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: UserData, enemy: UserData):
         # user_warrior_health = user.warrior_inwork * 30
@@ -57,6 +57,7 @@ class War:
             user.stone = min(user.stone + reward['stone'], user.stone_max())
             user.iron += reward['iron']
             user.orb += reward['orb']
+            user.exp += reward['exp']
         else:
             print('defeat')
             win = False
@@ -69,7 +70,7 @@ class War:
             'attack_archer': user.archer_inwork ,
             'attack_warlock': user.warlock_inwork ,
             'attack_warrior_die': user_warrior_die,
-            'attack_arcehr_die': user_warrior_die,
+            'attack_archer_die': user_warrior_die,
             'attack_warlock_die': user_warrior_die,
             'defender_warrior': enemy.warrior_inwork,
             'defender_archer': enemy.warrior_inwork,
@@ -121,5 +122,6 @@ class War:
             'stone': random.randint(0, 30),
             'iron': random.randint(0, 10),
             'orb': random.randint(0, 10),
-            'terrain': random.randint(1, 5)
+            'terrain': random.randint(1, 5),
+            'exp': random.randint(1, 5)
         }
