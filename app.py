@@ -92,7 +92,7 @@ async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
 
 @app.get('/find')
 async def find_enemies(token: str = Depends(token_auth)):
-    return await game_service.find()
+    return await game_service.find(token)
 
 @app.get('/attack/{enemy_id}')
 async def attack(enemy_id: int, token: str = Depends(token_auth)):

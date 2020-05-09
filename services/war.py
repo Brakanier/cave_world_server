@@ -7,12 +7,12 @@ class War:
     def __init__(self):
         pass
     
-    async def random_enemies(self):
+    async def random_enemies(self, user_id: int):
         count = await User.all().count()
         #limit = 3
         #offset = random.randint(0, count - limit)
         #return await UserPydanic.from_queryset(User.all().limit(limit).offset(offset).prefetch_related(UserData.get('terrain')))
-        return await UserData.all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        return await UserData.exclude(user__id=user_id).all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: UserData, enemy: UserData):
         # user_warrior_health = user.warrior_inwork * 30
@@ -66,15 +66,15 @@ class War:
         enemy_warrior_die, enemy_archer_die, enemy_warlock_die = self.get_dead(enemy, user_army)
 
         data = {
-            'attack_warrior': user.warrior_inwork ,
-            'attack_archer': user.archer_inwork ,
-            'attack_warlock': user.warlock_inwork ,
+            'attack_warrior': user.warrior_inwork,
+            'attack_archer': user.archer_inwork,
+            'attack_warlock': user.warlock_inwork,
             'attack_warrior_die': user_warrior_die,
-            'attack_archer_die': user_warrior_die,
-            'attack_warlock_die': user_warrior_die,
+            'attack_archer_die': user_archer_die,
+            'attack_warlock_die': user_warlock_die,
             'defender_warrior': enemy.warrior_inwork,
-            'defender_archer': enemy.warrior_inwork,
-            'defender_warlock': enemy.warrior_inwork,
+            'defender_archer': enemy.archer_inwork,
+            'defender_warlock': enemy.warlock_inwork,
             'defender_warrior_die': enemy_warrior_die,
             'defender_archer_die': enemy_archer_die,
             'defender_warlock_die': enemy_warlock_die 
@@ -99,25 +99,34 @@ class War:
         war_die = 0
         arch_die = 0
         warl_die = 0
+        print('war', war)
         if war < 0:
-            war_die = user.warlock_inwork
-            arch = user.archer_inwork + war
-            if arch < 0:
-                arch_die = user.archer_inwork
-                warl = user.warlock_inwork + arch
-                if warl < 0:
-                    warl_die = user.warlock_inwork
+            war_die = user.warrior_inwork
+            if user.archer_inwork:
+                arch = user.archer_inwork + war
+                print('arch', arch)
+                if arch < 0:
+                    arch_die = user.archer_inwork
+                    if user.warlock_inwork:
+                        warl = user.warlock_inwork + arch
+                        print('warl', warl)
+                        if warl < 0:
+                            warl_die = user.warlock_inwork
+                        else:
+                            warl_die = user.warlock_inwork - warl
                 else:
-                    warl_die = user.warlock_inwork - warl
-            else:
-                arch_die = user.archer_inwork - arch
+                    arch_die = user.archer_inwork - arch
         else:
             war_die = user.warrior_inwork - war
+
+        print('war_die', war_die)
+        print('arch_die', arch_die)
+        print('warl_die', warl_die)
         return war_die, arch_die, warl_die
 
     def get_reward(self, enemy: UserData):
         return {
-            'trophy': random.randint(0, 10),
+            'trophy': random.randint(1, 10),
             'wood': random.randint(0, 30),
             'stone': random.randint(0, 30),
             'iron': random.randint(0, 10),

@@ -3,6 +3,7 @@ import datetime
 from tortoise.expressions import F
 from tortoise.transactions import atomic
 from tortoise.query_utils import Q, Prefetch
+from fastapi import HTTPException
 
 from models import User, UserData, UserDataPydanic, Battle
 from .builds import Builds
@@ -17,7 +18,10 @@ class Game:
     
     @atomic()
     async def action(self, token: str, action: str, amount=None):
-        user_data = await UserData.filter(user__token=token).get()
+        user_data = await UserData.filter(user__token=token).get_or_none()
+        if not user_data:
+            raise HTTPException(404, "Not Found")
+
         await user_data.processing()
 
         if action == 'wood':
@@ -79,30 +83,45 @@ class Game:
 
         return await UserDataPydanic.from_tortoise_orm(user_data)
 
-    async def find(self):
-        return await self.war.random_enemies()
+    async def find(self, token: str):
+        user = await User.filter(token=token).get_or_none()
+        if not user:
+            raise HTTPException(404, "Not found")
+        return await self.war.random_enemies(user_id=user.id)
 
     @atomic()
     async def attack(self, token, enemy_id):
-        user = await UserData.filter(user__token=token).prefetch_related('user').get()
+        user = await UserData.filter(user__token=token).prefetch_related('user').get_or_none()
+        if not user:
+            raise HTTPException(404, "Not Found")
         await user.processing()
-        enemy = await UserData.filter(user__id=enemy_id).prefetch_related('user').get()
+        enemy = await UserData.filter(user__id=enemy_id).prefetch_related('user').get_or_none()
+        if not enemy:
+            raise HTTPException(404, "Not Found")
         await enemy.processing()
 
         battle = await self.war.attack(user, enemy)
 
-        await enemy.save()
-        await user.save()
+        # TODO uncomment
+        #await enemy.save()
+        #await user.save()
         
         return battle
 
     async def battles(self, token):
-        user = await User.filter(token=token).get()
+        user = await User.filter(token=token).get_or_none()
+        if not user:
+            raise HTTPException(404, "Not Found")
         return await Battle.filter(Q(Q(attack=user), Q(defender=user), join_type='OR')).prefetch_related('attack', 'defender').order_by('-time').all().limit(10).values('data', 'reward', 'time', 'win', 'attack__vk_id', 'attack__nickname', 'defender__vk_id', 'defender__nickname')
 
 
     async def level_up(self, token):
-        user = await UserData.filter(user__token=token).prefetch_related('user').get()
+        user = await UserData.filter(user__token=token).prefetch_related('user').get_or_none()
+        if not user:
+            raise HTTPException(404, "Not Found")
+        if user.current_exp() < user.need_exp():
+            raise HTTPException(400, "Need more exp")
+
         energy = 30
         terrain = 5 * user.level
         
@@ -124,10 +143,10 @@ class Game:
 
     async def extract(self, user_data, target):
         if user_data.energy < 1:
-            return None
+            raise HTTPException(400, "Need energy")
 
         if getattr(user_data, target) >= getattr(user_data, f'{target}_max')():
-            return None
+            raise HTTPException(400, "Need more place in store")
 
         user_data.energy -= 1
         user_data.exp += 1

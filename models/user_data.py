@@ -140,7 +140,7 @@ class UserData(models.Model):
             self.energy = min(self.energy + tics * 0.2, 30)
 
         if self.citizens < self.citizens_max():
-            self.citizens = min(self.citizens + tics * 0.2, self.citizens_max())
+            self.citizens = min(self.citizens + tics * 1, self.citizens_max())
 
         if self.wood_inwork and self.wood < self.wood_max():
             self.wood = min(self.wood + tics * 0.2 * self.wood_inwork, self.wood_max())
