@@ -48,11 +48,11 @@ class Users:
         if (len(nickname) > 18):
             raise HTTPException(400, 'Too long, max 18')
 
-        if (not bool(re.compile(r'[^a-zA-Z0-9.\-\_\]\[]').search(nickname))) {
+        if (not bool(re.compile(r'[^a-zA-Z0-9.\-\_\]\[]').search(nickname))):
             await User.filter(token=token).update(nickname=nickname)
-        } else {
+        else:
             raise HTTPException(400, 'Not allowed symbols')
-        }
+
         
         
         return nickname
