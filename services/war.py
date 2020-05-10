@@ -1,6 +1,9 @@
 import random
 import datetime
 
+from tortoise.query_utils import Q
+from fastapi import HTTPException
+
 from models import User, UserPydanic, UserData, UserDataPydanic, Battle, BattlePydanic
 
 class War:
@@ -12,9 +15,11 @@ class War:
         #limit = 3
         #offset = random.randint(0, count - limit)
         #return await UserPydanic.from_queryset(User.all().limit(limit).offset(offset).prefetch_related(UserData.get('terrain')))
-        return await UserData.exclude(user__id=user_id).all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        return await UserData.exclude(user__id=user_id).filter(Q(Q(warrior_inwork__gt=0), Q(archer_inwork__gt=0), Q(warlock_inwork__gt=0),  join_type='OR')).all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: UserData, enemy: UserData):
+        if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
+            raise HTTPException(400, "You haven`t army")
         # user_warrior_health = user.warrior_inwork * 30
         # user_archer_health = user.archer_inwork * 20
         # user_warlock_health = user.warlock_inwork * 10
