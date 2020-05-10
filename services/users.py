@@ -45,8 +45,8 @@ class Users:
     async def set_nickname(self, token: str, nickname: str):
         if (len(nickname) < 3):
             raise HTTPException(400, 'Too short, min 3')
-        if (len(nickname) > 18):
-            raise HTTPException(400, 'Too long, max 18')
+        if (len(nickname) > 15):
+            raise HTTPException(400, 'Too long, max 15')
 
         if (not bool(re.compile(r'[^a-zA-Z0-9.\-\_\]\[]').search(nickname))):
             await User.filter(token=token).update(nickname=nickname)
