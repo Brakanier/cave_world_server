@@ -12,10 +12,11 @@ class War:
     
     async def random_enemies(self, user_id: int):
         count = await User.all().count()
-        #limit = 3
+        limit = 3
         #offset = random.randint(0, count - limit)
         #return await UserPydanic.from_queryset(User.all().limit(limit).offset(offset).prefetch_related(UserData.get('terrain')))
-        return await UserData.exclude(user__id=user_id).filter(Q(Q(warrior_inwork__gt=0), Q(archer_inwork__gt=0), Q(warlock_inwork__gt=0),  join_type='OR')).all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        
+        return await UserData.exclude(user__id=user_id).filter(Q(Q(warrior_inwork__gt=0), Q(archer_inwork__gt=0), Q(warlock_inwork__gt=0),  join_type='OR')).all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: UserData, enemy: UserData):
         if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
@@ -54,8 +55,6 @@ class War:
         delta = user_army - enemy_army
         reward = None
         if delta >= 0:
-            print(user.wood)
-            print('win')
             win = True
             reward = self.get_reward(enemy)
             user.terrain += reward['terrain']
@@ -66,7 +65,6 @@ class War:
             user.orb += reward['orb']
             user.exp += reward['exp']
         else:
-            print('defeat')
             win = False
         
         user_warrior_die, user_archer_die, user_warlock_die = self.get_dead(user, enemy_army)
