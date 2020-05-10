@@ -102,9 +102,8 @@ class Game:
 
         battle = await self.war.attack(user, enemy)
 
-        # TODO uncomment
-        #await enemy.save()
-        #await user.save()
+        await enemy.save()
+        await user.save()
         
         return battle
 
