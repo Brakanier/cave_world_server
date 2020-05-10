@@ -141,6 +141,12 @@ class UserData(models.Model):
         self.normalize('smith')
         self.normalize('wizard')
         self.normalize('alchemist')
+        if self.wood < 0 :
+            self.wood = 0
+        if self.stone < 0:
+            self.stone = 0
+        if self.ore < 0:
+            self.ore = 0
         
         # 0.2 per minute
         if self.energy < 30:
