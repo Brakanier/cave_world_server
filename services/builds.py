@@ -14,8 +14,8 @@ class Builds:
             user_data.citizens += 1
     
     async def house(self, user_data: UserData):
-        wood = 10 + 10 * user_data.house
-        stone = 10 + 10 * user_data.house
+        wood = 15 + 15 * user_data.house
+        stone = 15 + 15 * user_data.house
         if user_data.wood >= wood and user_data.stone >= stone:
             user_data.wood -= wood
             user_data.stone -= stone
@@ -23,8 +23,8 @@ class Builds:
             user_data.citizens += 5
     
     async def mansion(self, user_data: UserData):
-        wood = 10 + 10 * user_data.mansion
-        stone = 10 + 10 * user_data.mansion
+        wood = 30 + 30 * user_data.mansion
+        stone = 30 + 30 * user_data.mansion
         if user_data.wood >= wood and user_data.stone >= stone:
             user_data.wood -= wood
             user_data.stone -= stone
