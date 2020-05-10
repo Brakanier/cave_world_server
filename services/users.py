@@ -47,8 +47,9 @@ class Users:
             raise HTTPException(400, 'Too short, min 3')
         if (len(nickname) > 15):
             raise HTTPException(400, 'Too long, max 15')
-
+        print(not bool(re.compile(r'[^a-zA-Z0-9.\-\_\]\[]').search(nickname)))
         if (not bool(re.compile(r'[^a-zA-Z0-9.\-\_\]\[]').search(nickname))):
+            
             await User.filter(token=token).update(nickname=nickname)
         else:
             raise HTTPException(400, 'Not allowed symbols')
