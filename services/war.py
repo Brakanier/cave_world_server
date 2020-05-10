@@ -20,6 +20,8 @@ class War:
     async def attack(self, user: UserData, enemy: UserData):
         if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
             raise HTTPException(400, "You haven`t army")
+        if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
+            raise HTTPException(400, "Enemy haven`t army")
         # user_warrior_health = user.warrior_inwork * 30
         # user_archer_health = user.archer_inwork * 20
         # user_warlock_health = user.warlock_inwork * 10

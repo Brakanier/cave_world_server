@@ -19,11 +19,26 @@ class Citizens:
 
     async def inwork(self, user_data: UserData, target: str, amount: int):
         inwork = getattr(user_data, f'{target}_inwork')
+        work = getattr(user_data, f'{target}_work')
+
+        if target == 'warrior':
+            work = work * 5
+        elif target == 'archer':
+            work = work * 3
+
         after_inwork = inwork + amount
-        
-        if amount > 0 and user_data.citizens_free() and after_inwork <= inwork:
+
+        if amount > 0 and user_data.citizens_free() > 0 and after_inwork <= work:
             setattr(user_data, f'{target}_inwork', after_inwork)
-        else:
+        elif amount < 0 and inwork > 0 and after_inwork >= 0:
             setattr(user_data, f'{target}_inwork', after_inwork)
 
-        
+    # async def warrior_inwork(self, user_data: UserData, amount):
+    #     inwork = getattr(user_data, 'warrior_inwork')
+    #     work = getattr(user_data, 'warrior_work') * 5
+    #     after_inwork = inwork + amount
+
+    #     if amount > 0 and user_data.citizens_free() > 0 and after_inwork <= work:
+    #         setattr(user_data, f'{target}_inwork', after_inwork)
+    #     elif amount < 0 and inwork > 0 and after_inwork >= 0:
+    #         setattr(user_data, f'{target}_inwork', after_inwork)
