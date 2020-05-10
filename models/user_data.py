@@ -135,6 +135,13 @@ class UserData(models.Model):
 
         print(tics)
 
+        self.normalize('wood')
+        self.normalize('stone')
+        self.normalize('ore')
+        self.normalize('smith')
+        self.normalize('wizard')
+        self.normalize('alchemist')
+        
         # 0.2 per minute
         if self.energy < 30:
             self.energy = min(self.energy + tics * 0.2, 30)
@@ -165,6 +172,14 @@ class UserData(models.Model):
             self.alchemy += tics * 0.1 * self.alchemist_inwork
 
         self.time = current
+
+    def normalize(self, target: str):
+        inwork = getattr(self, f'{target}_inwork')
+        work = getattr(self, f'{target}_work')
+        if inwork < 0:
+            setattr(self, f'{target}_inwork', 0)
+        elif inwork > work:
+            setattr(self, f'{target}_inwork', work)
 
 
     class PydanticMeta:

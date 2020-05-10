@@ -20,7 +20,7 @@ class Citizens:
     async def inwork(self, user_data: UserData, target: str, amount: int):
         inwork = getattr(user_data, f'{target}_inwork')
         after_inwork = inwork + amount
-
+        
         if amount > 0 and user_data.citizens_free() and after_inwork <= inwork:
             setattr(user_data, f'{target}_inwork', after_inwork)
         else:
