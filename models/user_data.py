@@ -177,6 +177,14 @@ class UserData(models.Model):
         if self.alchemist_inwork:
             self.alchemy += tics * 0.1 * self.alchemist_inwork
 
+        if self.warrior_inwork < 0:
+            self.warrior_inwork = 0
+        if self.archer_inwork < 0:
+            self.archer_inwork = 0
+        if self.warlock_inwork < 0:
+            self.warlock_inwork
+
+
         self.time = current
 
     def normalize(self, target: str):
