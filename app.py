@@ -79,6 +79,7 @@ async def level_up(token: str = Depends(token_auth)):
 
 @app.get('/data')
 async def data(token: str = Depends(token_auth)):
+    print('Object ID', connections)
     return await user_service.get_user_data(token)
 
 @app.get('/extract/{target}')
@@ -98,14 +99,17 @@ async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
 
 @app.get('/find')
 async def find_enemies(token: str = Depends(token_auth)):
+    print('Object ID', connections)
     return await game_service.find(token)
 
 @app.get('/attack/{enemy_id}')
 async def attack(enemy_id: int, token: str = Depends(token_auth)):
+    print('Object ID', connections)
     return await game_service.attack(token, enemy_id)
 
 @app.get('/battles')
 async def battles(token: str = Depends(token_auth)):
+    print('Object ID', connections)
     return await game_service.battles(token)
 
 register_tortoise(
