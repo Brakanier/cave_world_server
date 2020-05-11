@@ -9,6 +9,10 @@ import websocket
 from pydantic import BaseModel
 from fastapi import FastAPI, Body, File, UploadFile, Response, Cookie, Request, Depends, Header, HTTPException
 from fastapi.responses import RedirectResponse
+
+from fastapi.logger import logger
+import logging
+
 from starlette.middleware.cors import CORSMiddleware
 from starlette import status
 
@@ -24,8 +28,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+fh = logging.FileHandler('log.log')
+
+logger.addHandler(fh)
+
+
+
 connections = websocket.Connections()
-print('Object ID', connections)
+logger.info(f'Object ID - {id(connections)}')
+
+print('Object ID', id(connections))
 
 class VkLaunchParams(BaseModel):
     vk_user_id: int
@@ -79,37 +91,37 @@ async def level_up(token: str = Depends(token_auth)):
 
 @app.get('/data')
 async def data(token: str = Depends(token_auth)):
-    print('Object ID', connections)
+    logger.info(f'Object ID - {id(connections)}')
     return await user_service.get_user_data(token)
 
 @app.get('/extract/{target}')
 async def extract(target: str, token: str = Depends(token_auth)):
-    print('Object ID', connections)
+    logger.info(f'Object ID - {id(connections)}')
     return await game_service.action(token, target)
 
 @app.get('/build/{target}')
 async def build(target: str, token: str = Depends(token_auth)):
-    print('Object ID', connections)
+    logger.info(f'Object ID - {id(connections)}')
     return await game_service.action(token, target)
 
 @app.get('/citizen/{target}/{amount}')
 async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
-    print('Object ID', connections)
+    logger.info(f'Object ID - {id(connections)}')
     return await game_service.action(token, target, amount)
 
 @app.get('/find')
 async def find_enemies(token: str = Depends(token_auth)):
-    print('Object ID', connections)
+    logger.info(f'Object ID - {id(connections)}')
     return await game_service.find(token)
 
 @app.get('/attack/{enemy_id}')
 async def attack(enemy_id: int, token: str = Depends(token_auth)):
-    print('Object ID', connections)
+    logger.info(f'Object ID - {id(connections)}')
     return await game_service.attack(token, enemy_id)
 
 @app.get('/battles')
 async def battles(token: str = Depends(token_auth)):
-    print('Object ID', connections)
+    logger.info(f'Object ID - {id(connections)}')
     return await game_service.battles(token)
 
 register_tortoise(
