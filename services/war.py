@@ -118,7 +118,7 @@ class War:
                         if warl < 0:
                             warl_die = user.warlock_inwork
                         else:
-                            warl_die = user.warlock_inwork - warl
+                            warl_die = user.warlock_inwork + warl
                 else:
                     arch_die = user.archer_inwork - arch
         else:

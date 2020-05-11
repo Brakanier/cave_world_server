@@ -4,6 +4,7 @@ from tortoise.contrib.fastapi import register_tortoise
 import models # all db and pydanic models
 import services # all services
 import config
+import websocket
 
 from pydantic import BaseModel
 from fastapi import FastAPI, Body, File, UploadFile, Response, Cookie, Request, Depends, Header, HTTPException
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+connections = websocket.Connections()
 
 class VkLaunchParams(BaseModel):
     vk_user_id: int
