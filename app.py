@@ -25,6 +25,7 @@ app.add_middleware(
 )
 
 connections = websocket.Connections()
+print('Object ID', connections)
 
 class VkLaunchParams(BaseModel):
     vk_user_id: int
@@ -82,14 +83,17 @@ async def data(token: str = Depends(token_auth)):
 
 @app.get('/extract/{target}')
 async def extract(target: str, token: str = Depends(token_auth)):
+    print('Object ID', connections)
     return await game_service.action(token, target)
 
 @app.get('/build/{target}')
 async def build(target: str, token: str = Depends(token_auth)):
+    print('Object ID', connections)
     return await game_service.action(token, target)
 
 @app.get('/citizen/{target}/{amount}')
 async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
+    print('Object ID', connections)
     return await game_service.action(token, target, amount)
 
 @app.get('/find')

@@ -6,7 +6,7 @@ class Connector(WebSocketEndpoint):
 
     async def on_connect(self, websocket: WebSocket):
         await websocket.accept()
-        websocket.user_id =
+        #websocket.user_id =
 
     async def on_receive(self, websocket: WebSocket, data: dict):
         await websocket.send_bytes(b"Message: " + data)
