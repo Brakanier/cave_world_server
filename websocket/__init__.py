@@ -1,1 +1,2 @@
-from .connections import Connections
+from .connections import Connections, connections, UserConnect
+from .endpoint import EndPoint

@@ -6,6 +6,7 @@ from fastapi import HTTPException
 
 from models import User, UserPydanic, UserData, UserDataPydanic, Battle, BattlePydanic
 
+
 class War:
     def __init__(self):
         pass

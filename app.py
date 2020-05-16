@@ -15,10 +15,12 @@ import logging
 
 from starlette.middleware.cors import CORSMiddleware
 from starlette import status
+from starlette.routing import WebSocketRoute
 
 import datetime
 
 app = FastAPI()
+app.add_websocket_route("/ws/{token}", websocket.EndPoint)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,12 +34,9 @@ fh = logging.FileHandler('log.log')
 
 logger.addHandler(fh)
 
-
-
-connections = websocket.Connections()
+connections = ''#websocket.Connections()
 logger.info(f'Object ID - {id(connections)}')
 
-print('Object ID', id(connections))
 
 class VkLaunchParams(BaseModel):
     vk_user_id: int
@@ -52,14 +51,6 @@ async def token_auth(x_auth: str = Header(None)):
     if not x_auth:
         raise HTTPException(401, 'Unauthorized')
     return x_auth
-
-
-@app.get("/")
-async def read_root():
-    test = int(datetime.datetime.now().timestamp())
-    import time
-    print(test)
-    print(int(time.time()))
 
 game_service = services.Game()
 user_service = services.Users()
@@ -91,37 +82,30 @@ async def level_up(token: str = Depends(token_auth)):
 
 @app.get('/data')
 async def data(token: str = Depends(token_auth)):
-    logger.info(f'Object ID - {id(connections)}')
     return await user_service.get_user_data(token)
 
 @app.get('/extract/{target}')
 async def extract(target: str, token: str = Depends(token_auth)):
-    logger.info(f'Object ID - {id(connections)}')
     return await game_service.action(token, target)
 
 @app.get('/build/{target}')
 async def build(target: str, token: str = Depends(token_auth)):
-    logger.info(f'Object ID - {id(connections)}')
     return await game_service.action(token, target)
 
 @app.get('/citizen/{target}/{amount}')
 async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
-    logger.info(f'Object ID - {id(connections)}')
     return await game_service.action(token, target, amount)
 
 @app.get('/find')
 async def find_enemies(token: str = Depends(token_auth)):
-    logger.info(f'Object ID - {id(connections)}')
     return await game_service.find(token)
 
 @app.get('/attack/{enemy_id}')
 async def attack(enemy_id: int, token: str = Depends(token_auth)):
-    logger.info(f'Object ID - {id(connections)}')
     return await game_service.attack(token, enemy_id)
 
 @app.get('/battles')
 async def battles(token: str = Depends(token_auth)):
-    logger.info(f'Object ID - {id(connections)}')
     return await game_service.battles(token)
 
 register_tortoise(
