@@ -21,9 +21,11 @@ class War:
 
     async def attack(self, user: UserData, enemy: UserData):
         if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
-            raise HTTPException(400, "You haven`t army")
+            # raise HTTPException(400, "You haven`t army")
+            return
         if enemy.warrior_inwork < 1 and enemy.archer_inwork < 1 and enemy.warlock_inwork < 1:
-            raise HTTPException(400, "Enemy haven`t army")
+            # raise HTTPException(400, "Enemy haven`t army")
+            return
         # user_warrior_health = user.warrior_inwork * 30
         # user_archer_health = user.archer_inwork * 20
         # user_warlock_health = user.warlock_inwork * 10
@@ -63,7 +65,7 @@ class War:
             user.wood = min(user.wood + reward['wood'], user.wood_max())
             user.stone = min(user.stone + reward['stone'], user.stone_max())
             user.iron += reward['iron']
-            user.orb += reward['orb']
+            # user.orb += reward['orb']
             user.exp += reward['exp']
         else:
             win = False
@@ -73,28 +75,28 @@ class War:
 
         data = {
             'attack_warrior': user.warrior_inwork,
-            'attack_archer': user.archer_inwork,
-            'attack_warlock': user.warlock_inwork,
+            # 'attack_archer': user.archer_inwork,
+            # 'attack_warlock': user.warlock_inwork,
             'attack_warrior_die': user_warrior_die,
-            'attack_archer_die': user_archer_die,
-            'attack_warlock_die': user_warlock_die,
+            # 'attack_archer_die': user_archer_die,
+            # 'attack_warlock_die': user_warlock_die,
             'defender_warrior': enemy.warrior_inwork,
-            'defender_archer': enemy.archer_inwork,
-            'defender_warlock': enemy.warlock_inwork,
+            # 'defender_archer': enemy.archer_inwork,
+            # 'defender_warlock': enemy.warlock_inwork,
             'defender_warrior_die': enemy_warrior_die,
-            'defender_archer_die': enemy_archer_die,
-            'defender_warlock_die': enemy_warlock_die 
+            # 'defender_archer_die': enemy_archer_die,
+            # 'defender_warlock_die': enemy_warlock_die 
         }
         
         user.citizens -= user_warrior_die + user_archer_die + user_warlock_die
         user.warrior_inwork -= user_warrior_die
-        user.archer_inwork -= user_archer_die
-        user.warlock_inwork -= user_warlock_die
+        # user.archer_inwork -= user_archer_die
+        # user.warlock_inwork -= user_warlock_die
 
         enemy.citizens -= enemy_warrior_die + enemy_archer_die + enemy_warlock_die
         enemy.warrior_inwork -= enemy_warrior_die
-        enemy.archer_inwork -= enemy_archer_die
-        enemy.warlock_inwork -= enemy_warlock_die
+        # enemy.archer_inwork -= enemy_archer_die
+        # enemy.warlock_inwork -= enemy_warlock_die
 
         battle = await Battle.create(attack=user.user, defender=enemy.user, attack_vk_id=user.user.vk_id, defender_vk_id=enemy.user.vk_id, time=int(datetime.datetime.utcnow().timestamp()), win=win, data=data, reward=reward)
         return await BattlePydanic.from_tortoise_orm(battle)
@@ -136,7 +138,7 @@ class War:
             'wood': random.randint(0, 30),
             'stone': random.randint(0, 30),
             'iron': random.randint(0, 10),
-            'orb': random.randint(0, 10),
+            # 'orb': random.randint(0, 10),
             'terrain': random.randint(1, 5),
             'exp': random.randint(1, 5)
         }

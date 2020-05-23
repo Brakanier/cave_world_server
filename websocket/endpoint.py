@@ -3,6 +3,9 @@ from starlette.websockets import WebSocket
 
 import models
 from .connections import UserConnect, connections
+import services
+
+game = services.Game(connections.find, connections.notify)
 
 class EndPoint(WebSocketEndpoint):
     encoding = "json"
@@ -17,13 +20,21 @@ class EndPoint(WebSocketEndpoint):
         if not user:
             await websocket.close()
             return
-
         websocket.user_id = user.id
-        await connections.add(UserConnect(user, websocket))
-        
+        await user.data.processing()
+        await user.data.save()
+        send_data = await models.UserDataPydanic.from_tortoise_orm(user.data)
 
+        await connections.add(UserConnect(user, websocket))
+        await connections.notify(user.id, {'type': 'sync', 'data': send_data.dict()})
+    
     async def on_receive(self, websocket: WebSocket, data: dict):
-        await websocket.send_json(data)
+        user_connect = connections.find(websocket.user_id)
+        if not user_connect:
+            return
+
+        if "action" in data:
+            await game.action(websocket.user_id, data)
 
     async def on_disconnect(self, websocket: WebSocket, close_code):
         if hasattr(websocket, 'user_id'):

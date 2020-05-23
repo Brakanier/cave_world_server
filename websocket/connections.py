@@ -22,7 +22,7 @@ async def connections_process(connections, notify) -> None:
             await data.processing()
             await data.save()
             send_data = await models.UserDataPydanic.from_tortoise_orm(data)
-            await notify(user_id, send_data.dict())
+            await notify(user_id, {'type': 'sync', 'data': send_data.dict()})
         await asyncio.sleep(10)
 
 
@@ -30,7 +30,7 @@ class Connections:
     def __init__(self):
         self.__connections: Dict[int, UserConnect] = {}
         asyncio.ensure_future(connections_process(self.__connections, self.notify))
-    
+
     def find(self, user_id):
         if user_id in self.__connections:
             return self.__connections[user_id]

@@ -11,143 +11,142 @@ from .citizens import Citizens
 from .war import War
 
 class Game:
-    def __init__(self):
+    def __init__(self, find, notify):
+        self.notify = notify
+        self.find = find
         self.build = Builds()
         self.citizen = Citizens()
         self.war = War()
     
+    async def action(self, user_id: int, data: dict):
+        user_connect = self.find(user_id)
+        if not user_connect:
+            return
+        user = user_connect.user
+        await user.data.processing()
+
+        if data["action"] == 'wood':
+            await self.extract(user.data, 'wood')
+        elif data["action"] == 'stone':
+            await self.extract(user.data, 'stone')
+        
+        elif data["action"] == 'hut':
+            await self.build.hut(user.data)
+        elif data["action"] == 'house':
+            await self.build.house(user.data)
+        elif data["action"] == 'mansion':
+            await self.build.mansion(user.data)
+
+        elif data["action"] == 'wood_store':
+            await self.build.wood_store(user.data)
+        elif data["action"] == 'stone_store':
+            await self.build.stone_store(user.data)
+        
+        elif data["action"] == 'wood_work':
+            await self.build.wood_work(user.data)
+        elif data["action"] == 'stone_work':
+            await self.build.stone_work(user.data)
+        elif data["action"] == 'ore_work':
+            await self.build.ore_work(user.data)
+        elif data["action"] == 'smith_work':
+            await self.build.smith_work(user.data)
+        elif data["action"] == 'wizard_work':
+            await self.build.wizard_work(user.data)
+        elif data["action"] == 'alchemist_work':
+            await self.build.alchemist_work(user.data)
+        elif data["action"] == 'warrior_work':
+            await self.build.warrior_work(user.data)
+        elif data["action"] == 'archer_work':
+            await self.build.archer_work(user.data)
+        elif data["action"] == 'warlock_work':
+            await self.build.warlock_work(user.data)
+
+        elif data["action"] == 'wood_inwork':
+            await self.citizen.inwork(user.data, 'wood', data['amount'])
+        elif data["action"] == 'stone_inwork':
+            await self.citizen.inwork(user.data, 'stone', data['amount'])
+        elif data["action"] == 'ore_inwork':
+            await self.citizen.inwork(user.data, 'ore', data['amount'])
+        elif data["action"] == 'smith_inwork':
+            await self.citizen.inwork(user.data, 'smith', data['amount'])
+        elif data["action"] == 'wizard_inwork':
+            await self.citizen.inwork(user.data, 'wizard', data['amount'])
+        elif data["action"] == 'alchemist_inwork':
+            await self.citizen.inwork(user.data, 'alchemist', data['amount'])
+        elif data["action"] == 'warrior_inwork':
+            await self.citizen.inwork(user.data, 'warrior', data['amount'])
+        elif data["action"] == 'archer_inwork':
+            await self.citizen.inwork(user.data, 'archer', data['amount'])
+        elif data["action"] == 'warlock_inwork':
+            await self.citizen.inwork(user.data, 'warlock', data['amount'])
+
+        elif data["action"] == 'find':
+            enemies = await self.war.random_enemies(user_id=user.id)
+            await self.send(user.id, 'enemies', enemies)
+        elif data["action"] == 'attack':
+            # get user and enemy
+            enemy = self.find(data["id"])
+            if not enemy:
+                enemy = await User.filter(user__id=data["id"]).prefetch_related('data').get_or_none()
+            if not enemy:
+                return
+            
+            await self.attack(user, enemy)
+        elif data['action'] == 'battles':
+            battles = await self.battles(user)
+            await self.send(user.id, 'battles', battles)
+
+        if user.data.current_exp() >= user.data.need_exp():
+            reward = await self.level_up(user.data)
+            await self.send(user.id, 'levelup', reward)
+
+        await user.data.save()
+        await UserDataPydanic.from_tortoise_orm(user.data)
+
+    # async def find(self, token: str):
+    #     user = await User.filter(token=token).get_or_none()
+    #     if not user:
+    #         raise HTTPException(404, "Not found")
+    #     return await self.war.random_enemies(user_id=user.id)
+
     @atomic()
-    async def action(self, token: str, action: str, amount=None):
-        user_data = await UserData.filter(user__token=token).get_or_none()
-        if not user_data:
-            raise HTTPException(404, "Not Found")
+    async def attack(self, user: User, enemy: User):
+        await enemy.data.processing()
 
-        await user_data.processing()
+        battle = await self.war.attack(user.data, enemy.data)
+        await self.send(enemy.id, 'onattack', battle.dict())
+        await enemy.data.save()
 
-        if action == 'wood':
-            await self.extract(user_data, 'wood')
-        elif action == 'stone':
-            await self.extract(user_data, 'stone')
-        
-        elif action == 'hut':
-            await self.build.hut(user_data)
-        elif action == 'house':
-            await self.build.house(user_data)
-        elif action == 'mansion':
-            await self.build.mansion(user_data)
-
-        elif action == 'wood_store':
-            await self.build.wood_store(user_data)
-        elif action == 'stone_store':
-            await self.build.stone_store(user_data)
-        
-        elif action == 'wood_work':
-            await self.build.wood_work(user_data)
-        elif action == 'stone_work':
-            await self.build.stone_work(user_data)
-        elif action == 'ore_work':
-            await self.build.ore_work(user_data)
-        elif action == 'smith_work':
-            await self.build.smith_work(user_data)
-        elif action == 'wizard_work':
-            await self.build.wizard_work(user_data)
-        elif action == 'alchemist_work':
-            await self.build.alchemist_work(user_data)
-        elif action == 'warrior_work':
-            await self.build.warrior_work(user_data)
-        elif action == 'archer_work':
-            await self.build.archer_work(user_data)
-        elif action == 'warlock_work':
-            await self.build.warlock_work(user_data)
-
-        elif action == 'wood_inwork':
-            await self.citizen.inwork(user_data, 'wood', amount)
-        elif action == 'stone_inwork':
-            await self.citizen.inwork(user_data, 'stone', amount)
-        elif action == 'ore_inwork':
-            await self.citizen.inwork(user_data, 'ore', amount)
-        elif action == 'smith_inwork':
-            await self.citizen.inwork(user_data, 'smith', amount)
-        elif action == 'wizard_inwork':
-            await self.citizen.inwork(user_data, 'wizard', amount)
-        elif action == 'alchemist_inwork':
-            await self.citizen.inwork(user_data, 'alchemist', amount)
-        elif action == 'warrior_inwork':
-            await self.citizen.inwork(user_data, 'warrior', amount)
-        elif action == 'archer_inwork':
-            await self.citizen.inwork(user_data, 'archer', amount)
-        elif action == 'warlock_inwork':
-            await self.citizen.inwork(user_data, 'warlock', amount)
-
-        await user_data.save()
-
-        return await UserDataPydanic.from_tortoise_orm(user_data)
-
-    async def find(self, token: str):
-        user = await User.filter(token=token).get_or_none()
-        if not user:
-            raise HTTPException(404, "Not found")
-        return await self.war.random_enemies(user_id=user.id)
-
-    @atomic()
-    async def attack(self, token, enemy_id):
-        user = await UserData.filter(user__token=token).prefetch_related('user').get_or_none()
-        if not user:
-            raise HTTPException(404, "Not Found")
-        await user.processing()
-        enemy = await UserData.filter(user__id=enemy_id).prefetch_related('user').get_or_none()
-        if not enemy:
-            raise HTTPException(404, "Not Found")
-        await enemy.processing()
-
-        battle = await self.war.attack(user, enemy)
-
-        await enemy.save()
-        await user.save()
-        
-        return battle
-
-    async def battles(self, token):
-        user = await User.filter(token=token).get_or_none()
-        if not user:
-            raise HTTPException(404, "Not Found")
+    async def battles(self, user: User):
         return await Battle.filter(Q(Q(attack=user), Q(defender=user), join_type='OR')).prefetch_related('attack', 'defender').order_by('-time').all().limit(10).values('data', 'reward', 'time', 'win', 'attack__vk_id', 'attack__nickname', 'defender__vk_id', 'defender__nickname')
 
 
-    async def level_up(self, token):
-        user = await UserData.filter(user__token=token).prefetch_related('user').get_or_none()
-        if not user:
-            raise HTTPException(404, "Not Found")
-        if user.current_exp() < user.need_exp():
-            raise HTTPException(400, "Need more exp")
-
+    async def level_up(self, user_data: UserData):
         energy = 30
-        terrain = 5 * user.level
-        
-        alchemy = 5 * user.level
-        gold = 10 * user.level
+        terrain = 5 * user_data.level
+        gold = 10 * user_data.level
         reward = {
             'energy': energy,
-            'alchemy': alchemy,
             'terrain': terrain,
             'gold': gold
         }
-        user.energy += energy
-        user.terrain += terrain
-        user.alchemy += alchemy
-        user.gold += gold
-        user.level += 1
-        await user.save()
+        user_data.energy += energy
+        user_data.terrain += terrain
+        user_data.gold += gold
+        user_data.level += 1
         return reward
 
     async def extract(self, user_data, target):
         if user_data.energy < 1:
-            raise HTTPException(400, "Need energy")
+            return
 
         if getattr(user_data, target) >= getattr(user_data, f'{target}_max')():
-            raise HTTPException(400, "Need more place in store")
+            return
 
         user_data.energy -= 1
         user_data.exp += 1
 
         setattr(user_data, target, getattr(user_data, target) + 1)
+
+    async def send(self, user_id: int, type: str, data: dict):
+        await self.notify(user_id, {'type': type, 'data': data})

@@ -52,7 +52,6 @@ async def token_auth(x_auth: str = Header(None)):
         raise HTTPException(401, 'Unauthorized')
     return x_auth
 
-game_service = services.Game()
 user_service = services.Users()
 
 #vk_user_id: int, vk_app_id: int, vk_is_app_user: bool, vk_are_notifications_enabled: bool, vk_language: str, vk_ref: str, vk_access_token_settings: str
@@ -76,37 +75,37 @@ async def login_test(vk_id: str):
 async def set_nickname(nickname: str, token: str = Depends(token_auth)):
     return await user_service.set_nickname(token, nickname)
 
-@app.get('/level-up')
-async def level_up(token: str = Depends(token_auth)):
-    return await game_service.level_up(token)
+# @app.get('/level-up')
+# async def level_up(token: str = Depends(token_auth)):
+#     return await game_service.level_up(token)
 
-@app.get('/data')
-async def data(token: str = Depends(token_auth)):
-    return await user_service.get_user_data(token)
+# @app.get('/data')
+# async def data(token: str = Depends(token_auth)):
+#     return await user_service.get_user_data(token)
 
-@app.get('/extract/{target}')
-async def extract(target: str, token: str = Depends(token_auth)):
-    return await game_service.action(token, target)
+# @app.get('/extract/{target}')
+# async def extract(target: str, token: str = Depends(token_auth)):
+#     return await game_service.action(token, target)
 
-@app.get('/build/{target}')
-async def build(target: str, token: str = Depends(token_auth)):
-    return await game_service.action(token, target)
+# @app.get('/build/{target}')
+# async def build(target: str, token: str = Depends(token_auth)):
+#     return await game_service.action(token, target)
 
-@app.get('/citizen/{target}/{amount}')
-async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
-    return await game_service.action(token, target, amount)
+# @app.get('/citizen/{target}/{amount}')
+# async def citizen(target: str, amount: int, token: str = Depends(token_auth)):
+#     return await game_service.action(token, target, amount)
 
-@app.get('/find')
-async def find_enemies(token: str = Depends(token_auth)):
-    return await game_service.find(token)
+# @app.get('/find')
+# async def find_enemies(token: str = Depends(token_auth)):
+#     return await game_service.find(token)
 
-@app.get('/attack/{enemy_id}')
-async def attack(enemy_id: int, token: str = Depends(token_auth)):
-    return await game_service.attack(token, enemy_id)
+# @app.get('/attack/{enemy_id}')
+# async def attack(enemy_id: int, token: str = Depends(token_auth)):
+#     return await game_service.attack(token, enemy_id)
 
-@app.get('/battles')
-async def battles(token: str = Depends(token_auth)):
-    return await game_service.battles(token)
+# @app.get('/battles')
+# async def battles(token: str = Depends(token_auth)):
+#     return await game_service.battles(token)
 
 register_tortoise(
     app,
