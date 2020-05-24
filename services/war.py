@@ -102,7 +102,7 @@ class War:
         if enemy.citizens == 0:
             return None
         
-        if enemy.citizens_free > 0:
+        if enemy.citizens_free() > 0:
             free_dead = max(enemy.citizens_free - warriors*2, 0)
             deads["free"] = free_dead
             warriors -= free_dead / 2
