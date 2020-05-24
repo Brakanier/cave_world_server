@@ -107,6 +107,7 @@ class War:
         if enemy.citizens_free() > 0:
             free_dead = min(warriors*2, enemy.citizens_free())
             deads["free"] = free_dead
+            enemy.citizens -= free_dead
             warriors -= free_dead / 2
             deads['warriors'] += warriors
             if warriors <= 0:
@@ -116,6 +117,8 @@ class War:
         if enemy.smith_inwork > 0:
             smith_dead = min(warriors*2, enemy.smith_inwork)
             deads["smith"] = smith_dead
+            enemy.citizens -= smith_dead
+            enemy.smith_inwork -= smith_dead
             warriors -= smith_dead / 2
             deads['warriors'] += warriors
             if warriors <= 0:
@@ -125,6 +128,8 @@ class War:
         if enemy.wood_inwork > 0:
             wood_dead = min(warriors*2, enemy.wood_inwork)
             deads["wood"] = wood_dead
+            enemy.citizens -= wood_dead
+            enemy.wood_inwork -= wood_dead
             warriors -= wood_dead / 2
             deads['warriors'] += warriors
             if warriors <= 0:
@@ -134,6 +139,8 @@ class War:
         if enemy.stone_inwork > 0:
             stone_dead = min(warriors*2, enemy.stone_inwork)
             deads["stone"] = stone_dead
+            enemy.citizens -= stone_dead
+            enemy.stone_inwork -= stone_dead
             warriors -= stone_dead / 2
             deads['warriors'] += warriors
             if warriors <= 0:
