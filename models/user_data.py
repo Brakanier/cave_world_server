@@ -28,7 +28,7 @@ class UserData(models.Model):
 
     # Население
 
-    citizens = fields.FloatField(default=0)
+    citizens = fields.FloatField(default=10)
     wood_inwork = fields.IntField(default=0)
     stone_inwork = fields.IntField(default=0)
 
