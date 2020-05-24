@@ -99,12 +99,13 @@ class War:
         return war_die
 
     def get_dead_citizens(self, warriors, enemy):
+        print(warriors)
         deads = {
             'warriors': 0
         }
         if enemy.citizens == 0:
             return None
-        
+        print('free_citizens', enemy.citizens_free())
         if enemy.citizens_free() >= 1:
             free_dead = min(warriors*2, int(enemy.citizens_free()))
             deads["free"] = free_dead
@@ -114,7 +115,7 @@ class War:
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
-        
+        print('smith dead')
         if enemy.smith_inwork > 0:
             smith_dead = min(warriors*2, enemy.smith_inwork)
             deads["smith"] = smith_dead
@@ -125,7 +126,7 @@ class War:
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
-        
+        print('wood dead')
         if enemy.wood_inwork > 0:
             wood_dead = min(warriors*2, enemy.wood_inwork)
             deads["wood"] = wood_dead
@@ -136,7 +137,7 @@ class War:
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
-        
+        print('stone dead')
         if enemy.stone_inwork > 0:
             stone_dead = min(warriors*2, enemy.stone_inwork)
             deads["stone"] = stone_dead
