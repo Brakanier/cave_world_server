@@ -110,7 +110,7 @@ class War:
             deads["free"] = free_dead
             enemy.citizens -= free_dead
             warriors -= free_dead / 2
-            deads['warriors'] += warriors
+            deads['warriors'] += free_dead / 2
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
@@ -121,7 +121,7 @@ class War:
             enemy.citizens -= smith_dead
             enemy.smith_inwork -= smith_dead
             warriors -= smith_dead / 2
-            deads['warriors'] += warriors
+            deads['warriors'] += smith_dead / 2
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
@@ -132,7 +132,7 @@ class War:
             enemy.citizens -= wood_dead
             enemy.wood_inwork -= wood_dead
             warriors -= wood_dead / 2
-            deads['warriors'] += warriors
+            deads['warriors'] += wood_dead / 2
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
@@ -143,7 +143,7 @@ class War:
             enemy.citizens -= stone_dead
             enemy.stone_inwork -= stone_dead
             warriors -= stone_dead / 2
-            deads['warriors'] += warriors
+            deads['warriors'] += stone_dead / 2
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
