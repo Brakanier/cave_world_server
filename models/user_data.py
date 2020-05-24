@@ -22,9 +22,9 @@ class UserData(models.Model):
     # Ресурсы
     gold = fields.IntField(default=0)
 
-    wood = fields.FloatField(default=0)
-    stone = fields.FloatField(default=0)
-    iron = fields.FloatField(default=0)
+    wood = fields.FloatField(default=100)
+    stone = fields.FloatField(default=100)
+    iron = fields.FloatField(default=100)
 
     # Население
 
@@ -58,7 +58,7 @@ class UserData(models.Model):
     stone_store = fields.IntField(default=0)
 
     ## Дома
-    hut = fields.IntField(default=0)
+    hut = fields.IntField(default=10)
     house = fields.IntField(default=0)
     mansion = fields.IntField(default=0)
 
