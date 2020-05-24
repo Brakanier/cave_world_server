@@ -73,7 +73,7 @@ class Game:
         #     await self.citizen.inwork(user.data, 'warlock', data['amount'])
 
         elif data["action"] == 'find':
-            enemies = await self.war.random_enemies(user_id=user.id)
+            enemies = await self.war.random_enemies(user_id=user.id, user.data.level)
             await self.send(user.id, 'enemies', enemies)
         elif data["action"] == 'attack':
             # get user and enemy

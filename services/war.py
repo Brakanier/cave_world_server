@@ -11,12 +11,13 @@ class War:
     def __init__(self):
         pass
     
-    async def random_enemies(self, user_id: int):
+    async def random_enemies(self, user_id: int, level: int):
         count = await User.all().count()
         limit = 3
         #offset = random.randint(0, count - limit)
         #return await UserData.all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
-        return await UserData.exclude(user__id=user_id).order_by('-last_defend').all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        time_now = int(datetime.datetime.utcnow().timestamp())
+        return await UserData.exclude(user__id=user_id).filter(last_defend__lt=time_now - 3600, level__gte=level).order_by('last_defend').all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: User, enemy: User):
         user_user, user = user, user.data
@@ -31,14 +32,15 @@ class War:
         reward = None
         if delta >= 0:
             win = True
-            reward = self.get_reward(enemy)
-            user.terrain += reward['terrain']
-            user.trophy += reward['trophy']
-            user.wood = min(user.wood + reward['wood'], user.wood_max())
-            user.stone = min(user.stone + reward['stone'], user.stone_max())
-            user.iron += reward['iron']
-            # user.orb += reward['orb']
-            user.exp += reward['exp']
+            if enemy_army:
+                reward = self.get_reward(enemy)
+                user.terrain += reward['terrain']
+                user.trophy += reward['trophy']
+                user.wood = min(user.wood + reward['wood'], user.wood_max())
+                user.stone = min(user.stone + reward['stone'], user.stone_max())
+                user.iron += reward['iron']
+                # user.orb += reward['orb']
+                user.exp += reward['exp']
         else:
             win = False
         
@@ -99,13 +101,12 @@ class War:
         return war_die
 
     def get_dead_citizens(self, warriors, enemy):
-        print(warriors)
         deads = {
             'warriors': 0
         }
         if enemy.citizens == 0:
             return None
-        print('free_citizens', enemy.citizens_free())
+
         if enemy.citizens_free() >= 1:
             free_dead = min(warriors*2, int(enemy.citizens_free()))
             deads["free"] = free_dead
@@ -115,7 +116,7 @@ class War:
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
-        print('smith dead')
+
         if enemy.smith_inwork > 0:
             smith_dead = min(warriors*2, enemy.smith_inwork)
             deads["smith"] = smith_dead
@@ -126,7 +127,7 @@ class War:
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
-        print('wood dead')
+
         if enemy.wood_inwork > 0:
             wood_dead = min(warriors*2, enemy.wood_inwork)
             deads["wood"] = wood_dead
@@ -137,7 +138,7 @@ class War:
             if warriors <= 0:
                 deads["warriors"] = round(deads["warriors"])
                 return deads
-        print('stone dead')
+
         if enemy.stone_inwork > 0:
             stone_dead = min(warriors*2, enemy.stone_inwork)
             deads["stone"] = stone_dead
