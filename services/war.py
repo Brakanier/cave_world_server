@@ -15,10 +15,12 @@ class War:
         count = await User.all().count()
         limit = 3
         #offset = random.randint(0, count - limit)
-        
-        return await UserData.exclude(user__id=user_id).filter(Q(Q(warrior_inwork__gt=0), Q(archer_inwork__gt=0), Q(warlock_inwork__gt=0),  join_type='OR')).all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        return await UserData.all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        #return await UserData.exclude(user__id=user_id).filter(Q(Q(warrior_inwork__gt=0), Q(archer_inwork__gt=0), Q(warlock_inwork__gt=0),  join_type='OR')).all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
-    async def attack(self, user: UserData, user_vk_id: int, enemy: UserData, enemy_vk_id: int):
+    async def attack(self, user: User, enemy: User):
+        user_user, user = user, user.data
+        enemy_user, enemy = enemy, enemy.data
         if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
             return
         if enemy.warrior_inwork < 1 and enemy.archer_inwork < 1 and enemy.warlock_inwork < 1:
@@ -83,7 +85,7 @@ class War:
         # enemy.archer_inwork -= enemy_archer_die
         # enemy.warlock_inwork -= enemy_warlock_die
 
-        battle = await Battle.create(attack=user.user, defender=enemy.user, attack_vk_id=user_vk_id, defender_vk_id=enemy_vk_id, time=int(datetime.datetime.utcnow().timestamp()), win=win, data=data, reward=reward)
+        battle = await Battle.create(attack=user_user, defender=enemy_user, attack_vk_id=user_user.vk_id, defender_vk_id=enemy_user.vk_id, time=int(datetime.datetime.utcnow().timestamp()), win=win, data=data, reward=reward)
         return await BattlePydanic.from_tortoise_orm(battle)
         
 

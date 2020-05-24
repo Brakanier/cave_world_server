@@ -109,9 +109,11 @@ class Game:
     async def attack(self, user: User, enemy: User):
         await enemy.data.processing()
 
-        battle = await self.war.attack(user.data, user.vk_id, enemy.data, enemy.vk_id)
-        await self.send(enemy.id, 'onattack', battle.dict())
-        await enemy.data.save()
+        battle = await self.war.attack(user, enemy)
+        if battle:
+            await self.send(enemy.id, 'onattack', battle.dict())
+            await self.send(user.id, 'attack', battle.dict())
+            await enemy.data.save()
 
     async def battles(self, user: User):
         return await Battle.filter(Q(Q(attack=user), Q(defender=user), join_type='OR')).prefetch_related('attack', 'defender').order_by('-time').all().limit(10).values('data', 'reward', 'time', 'win', 'attack__vk_id', 'attack__nickname', 'defender__vk_id', 'defender__nickname')
