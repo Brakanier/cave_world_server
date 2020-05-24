@@ -21,9 +21,7 @@ class War:
     async def attack(self, user: User, enemy: User):
         user_user, user = user, user.data
         enemy_user, enemy = enemy, enemy.data
-        if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
-            return
-        if enemy.warrior_inwork < 1 and enemy.archer_inwork < 1 and enemy.warlock_inwork < 1:
+        if user.warrior_inwork < 1:
             return
 
         user_army = user.warrior_inwork# + user.archer_inwork + user.warlock_inwork
