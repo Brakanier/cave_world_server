@@ -81,11 +81,12 @@ class Game:
             if enemy_connect:
                 enemy = enemy_connect.user
             else:
-                enemy = await User.filter(user__id=data["id"]).prefetch_related('data').get_or_none()
+                enemy = await UserData.filter(user__id=data["id"]).prefetch_related('user').get_or_none()
+                enemy = enemy.user if enemy else None
             if not enemy:
                 return
             
-            await self.attack(user, enemy)
+            await self.attack(user, enemy.user)
         elif data['action'] == 'battles':
             battles = await self.battles(user)
             await self.send(user.id, 'battles', battles)
