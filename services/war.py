@@ -52,7 +52,7 @@ class War:
 
         deads = None
         if user_warrior_die < user.warrior_inwork and enemy_warrior_die == enemy.warrior_inwork:
-            deads = self.get_dead_citizens(user_warrior_die < user.warrior_inwork, enemy)
+            deads = self.get_dead_citizens(user.warrior_inwork - user_warrior_die, enemy)
             print(deads)
 
         data = {
