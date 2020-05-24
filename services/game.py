@@ -82,7 +82,6 @@ class Game:
                 enemy_user = enemy_connect.user
             else:
                 enemy = await UserData.filter(user__id=data["id"]).prefetch_related('user').get_or_none()
-                await enemy.processing()
                 enemy_user = enemy.user if enemy else None
             if not enemy_user:
                 return
@@ -108,6 +107,8 @@ class Game:
 
     @atomic()
     async def attack(self, user: User, enemy: User):
+        await enemy.data.get_or_none()
+        await enemy.data.processing()
         battle = await self.war.attack(user, enemy)
         if battle:
             await self.send(enemy.id, 'onattack', battle.dict())
