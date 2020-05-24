@@ -109,7 +109,7 @@ class Game:
     async def attack(self, user: User, enemy: User):
         await enemy.data.processing()
 
-        battle = await self.war.attack(user.data, enemy.data, enemy.vk_id)
+        battle = await self.war.attack(user.data, user.vk_id, enemy.data, enemy.vk_id)
         await self.send(enemy.id, 'onattack', battle.dict())
         await enemy.data.save()
 
