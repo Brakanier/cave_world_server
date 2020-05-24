@@ -70,7 +70,7 @@ class War:
         }
 
         if deads:
-            data["attack_warrior_die"] += deads["warrior"]
+            data["attack_warrior_die"] += deads["warriors"]
             del deads["warrior"]
             for key in deads:
                 data[key] = deads[key]
