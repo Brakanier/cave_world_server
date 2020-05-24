@@ -79,8 +79,8 @@ class Game:
             # get user and enemy
             enemy_connect = self.find(data["id"])
             if enemy_connect:
-                enemy = enemy.user
-            if not enemy:
+                enemy = enemy_connect.user
+            else:
                 enemy = await User.filter(user__id=data["id"]).prefetch_related('data').get_or_none()
             if not enemy:
                 return
