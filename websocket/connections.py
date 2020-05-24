@@ -31,13 +31,13 @@ class Connections:
         self.__connections: Dict[int, UserConnect] = {}
         asyncio.ensure_future(connections_process(self.__connections, self.notify))
 
-    def find(self, user_id):
+    def find(self, user_id) -> UserConnect:
         if user_id in self.__connections:
             return self.__connections[user_id]
         else:
             return None
 
-    async def notify(self, user_id, data):
+    async def notify(self, user_id, data) -> None:
         if user_id in self.__connections:
             await self.__connections[user_id].send(data)
 

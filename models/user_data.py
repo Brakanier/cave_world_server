@@ -10,12 +10,13 @@ class UserData(models.Model):
     id = fields.IntField(pk=True)
     user = fields.OneToOneField("models.User", related_name="data")
     time = fields.BigIntField()
+    last_defend = fields.BigIntField(default=0)
 
     exp = fields.BigIntField(default=0)
     level = fields.IntField(default=1)
 
     energy = fields.FloatField(default=30)
-    terrain = fields.IntField(default=100)
+    terrain = fields.IntField(default=30)
     trophy = fields.IntField(default=0)
 
     # Ресурсы
@@ -23,21 +24,15 @@ class UserData(models.Model):
 
     wood = fields.FloatField(default=0)
     stone = fields.FloatField(default=0)
-
-    ore = fields.FloatField(default=0)
     iron = fields.FloatField(default=0)
-    orb = fields.FloatField(default=0)
-    alchemy = fields.FloatField(default=0)
 
     # Население
 
     citizens = fields.FloatField(default=0)
     wood_inwork = fields.IntField(default=0)
     stone_inwork = fields.IntField(default=0)
-    ore_inwork = fields.IntField(default=0)
 
     smith_inwork = fields.IntField(default=0)
-    wizard_inwork = fields.IntField(default=0)
     alchemist_inwork = fields.IntField(default=0)
 
     ## Армия
@@ -54,16 +49,13 @@ class UserData(models.Model):
     ## Добыча
     wood_work = fields.IntField(default=0)
     stone_work = fields.IntField(default=0)
-    ore_work = fields.IntField(default=0)
 
     smith_work = fields.IntField(default=0)
-    wizard_work = fields.IntField(default=0)
     alchemist_work = fields.IntField(default=0)
 
     ## Склады
     wood_store = fields.IntField(default=0)
     stone_store = fields.IntField(default=0)
-    ore_store = fields.IntField(default=0)
 
     ## Дома
     hut = fields.IntField(default=0)
@@ -71,10 +63,13 @@ class UserData(models.Model):
     mansion = fields.IntField(default=0)
 
     def current_exp(self) -> int:
-        return self.exp - sum([lvl * 10 for lvl in range(self.level)])
+        return self.exp - sum([self.need_exp(lvl) for lvl in range(self.level)])
     
-    def need_exp(self) -> int:
-        return sum([lvl * 10 for lvl in range(self.level + 1)])
+    def need_exp(self, level: int = None) -> int:
+        if level != None:
+            return sum([lvl * 10 for lvl in range(level + 1)])
+        else:
+            return sum([lvl * 10 for lvl in range(self.level + 1)])
 
     def energy_max(self) -> int:
         return 30
@@ -93,9 +88,7 @@ class UserData(models.Model):
             self.citizens
             - self.wood_inwork
             - self.stone_inwork
-            - self.ore_inwork
             - self.smith_inwork
-            - self.wizard_inwork
             - self.alchemist_inwork
             - self.warrior_inwork
             - self.archer_inwork
@@ -110,12 +103,9 @@ class UserData(models.Model):
             - self.mansion
             - self.wood_store
             - self.stone_store
-            - self.ore_store
             - self.wood_work
             - self.stone_work
-            - self.ore_work
             - self.smith_work
-            - self.wizard_work
             - self.alchemist_work
         )
     
@@ -135,18 +125,18 @@ class UserData(models.Model):
 
         print(tics)
 
-        self.normalize('wood')
-        self.normalize('stone')
-        self.normalize('ore')
-        self.normalize('smith')
-        self.normalize('wizard')
-        self.normalize('alchemist')
-        if self.wood < 0 :
-            self.wood = 0
-        if self.stone < 0:
-            self.stone = 0
-        if self.ore < 0:
-            self.ore = 0
+        # self.normalize('wood')
+        # self.normalize('stone')
+        # self.normalize('ore')
+        # self.normalize('smith')
+        # self.normalize('wizard')
+        # self.normalize('alchemist')
+        # if self.wood < 0 :
+        #     self.wood = 0
+        # if self.stone < 0:
+        #     self.stone = 0
+        # if self.ore < 0:
+        #     self.ore = 0
         
         # 0.2 per minute
         if self.energy < 30:
@@ -163,37 +153,42 @@ class UserData(models.Model):
                 self.stone + tics * 0.2 * self.stone_inwork, self.stone_max()
             )
         
-        if self.ore_inwork:
-            self.ore += tics * 0.2 * self.ore_inwork
+        # if self.ore_inwork:
+        #     self.ore += tics * 0.2 * self.ore_inwork
 
-        if self.smith_inwork and self.ore >= 1:
-            iron = min(tics * 0.1 * self.smith_inwork, self.ore)
-            self.iron += iron
-            self.ore -= iron
+        if self.smith_inwork:
+            self.iron += tics * 0.1 * self.smith_inwork
         
-        if self.wizard_inwork:
-            self.orb += tics * 0.1 * self.wizard_inwork
+        # if self.smith_inwork and self.ore >= 1:
+        #     iron = min(tics * 0.1 * self.smith_inwork, self.ore)
+        #     self.iron += iron
+        #     self.ore -= iron
+            
+        
+        # if self.wizard_inwork:
+        #     self.orb += tics * 0.1 * self.wizard_inwork
         
         if self.alchemist_inwork:
-            self.alchemy += tics * 0.1 * self.alchemist_inwork
+            pass
+            # self.alchemy += tics * 0.1 * self.alchemist_inwork
 
-        if self.warrior_inwork < 0:
-            self.warrior_inwork = 0
-        if self.archer_inwork < 0:
-            self.archer_inwork = 0
-        if self.warlock_inwork < 0:
-            self.warlock_inwork
+        # if self.warrior_inwork < 0:
+        #     self.warrior_inwork = 0
+        # if self.archer_inwork < 0:
+        #     self.archer_inwork = 0
+        # if self.warlock_inwork < 0:
+        #     self.warlock_inwork
 
 
         self.time = current
 
-    def normalize(self, target: str):
-        inwork = getattr(self, f'{target}_inwork')
-        work = getattr(self, f'{target}_work')
-        if inwork < 0:
-            setattr(self, f'{target}_inwork', 0)
-        elif inwork > work:
-            setattr(self, f'{target}_inwork', work)
+    # def normalize(self, target: str):
+    #     inwork = getattr(self, f'{target}_inwork')
+    #     work = getattr(self, f'{target}_work')
+    #     if inwork < 0:
+    #         setattr(self, f'{target}_inwork', 0)
+    #     elif inwork > work:
+    #         setattr(self, f'{target}_inwork', work)
 
 
     class PydanticMeta:

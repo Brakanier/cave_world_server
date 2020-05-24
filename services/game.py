@@ -46,39 +46,31 @@ class Game:
             await self.build.wood_work(user.data)
         elif data["action"] == 'stone_work':
             await self.build.stone_work(user.data)
-        elif data["action"] == 'ore_work':
-            await self.build.ore_work(user.data)
         elif data["action"] == 'smith_work':
             await self.build.smith_work(user.data)
-        elif data["action"] == 'wizard_work':
-            await self.build.wizard_work(user.data)
         elif data["action"] == 'alchemist_work':
             await self.build.alchemist_work(user.data)
         elif data["action"] == 'warrior_work':
             await self.build.warrior_work(user.data)
-        elif data["action"] == 'archer_work':
-            await self.build.archer_work(user.data)
-        elif data["action"] == 'warlock_work':
-            await self.build.warlock_work(user.data)
+        # elif data["action"] == 'archer_work':
+        #     await self.build.archer_work(user.data)
+        # elif data["action"] == 'warlock_work':
+        #     await self.build.warlock_work(user.data)
 
         elif data["action"] == 'wood_inwork':
             await self.citizen.inwork(user.data, 'wood', data['amount'])
         elif data["action"] == 'stone_inwork':
             await self.citizen.inwork(user.data, 'stone', data['amount'])
-        elif data["action"] == 'ore_inwork':
-            await self.citizen.inwork(user.data, 'ore', data['amount'])
         elif data["action"] == 'smith_inwork':
             await self.citizen.inwork(user.data, 'smith', data['amount'])
-        elif data["action"] == 'wizard_inwork':
-            await self.citizen.inwork(user.data, 'wizard', data['amount'])
         elif data["action"] == 'alchemist_inwork':
             await self.citizen.inwork(user.data, 'alchemist', data['amount'])
         elif data["action"] == 'warrior_inwork':
             await self.citizen.inwork(user.data, 'warrior', data['amount'])
-        elif data["action"] == 'archer_inwork':
-            await self.citizen.inwork(user.data, 'archer', data['amount'])
-        elif data["action"] == 'warlock_inwork':
-            await self.citizen.inwork(user.data, 'warlock', data['amount'])
+        # elif data["action"] == 'archer_inwork':
+        #     await self.citizen.inwork(user.data, 'archer', data['amount'])
+        # elif data["action"] == 'warlock_inwork':
+        #     await self.citizen.inwork(user.data, 'warlock', data['amount'])
 
         elif data["action"] == 'find':
             enemies = await self.war.random_enemies(user_id=user.id)
@@ -98,16 +90,16 @@ class Game:
 
         if user.data.current_exp() >= user.data.need_exp():
             reward = await self.level_up(user.data)
-            await self.send(user.id, 'levelup', reward)
+            data = {
+                'reward': reward,
+                'current_exp': user.data.current_exp(),
+                'need_exp': user.data.need_exp(),
+                'exp': user.data.exp,
+            }
+            await self.send(user.id, 'levelup', data)
 
         await user.data.save()
         await UserDataPydanic.from_tortoise_orm(user.data)
-
-    # async def find(self, token: str):
-    #     user = await User.filter(token=token).get_or_none()
-    #     if not user:
-    #         raise HTTPException(404, "Not found")
-    #     return await self.war.random_enemies(user_id=user.id)
 
     @atomic()
     async def attack(self, user: User, enemy: User):

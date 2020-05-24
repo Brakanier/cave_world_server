@@ -15,45 +15,17 @@ class War:
         count = await User.all().count()
         limit = 3
         #offset = random.randint(0, count - limit)
-        #return await UserPydanic.from_queryset(User.all().limit(limit).offset(offset).prefetch_related(UserData.get('terrain')))
         
         return await UserData.exclude(user__id=user_id).filter(Q(Q(warrior_inwork__gt=0), Q(archer_inwork__gt=0), Q(warlock_inwork__gt=0),  join_type='OR')).all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: UserData, enemy: UserData):
         if user.warrior_inwork < 1 and user.archer_inwork < 1 and user.warlock_inwork < 1:
-            # raise HTTPException(400, "You haven`t army")
             return
         if enemy.warrior_inwork < 1 and enemy.archer_inwork < 1 and enemy.warlock_inwork < 1:
-            # raise HTTPException(400, "Enemy haven`t army")
             return
-        # user_warrior_health = user.warrior_inwork * 30
-        # user_archer_health = user.archer_inwork * 20
-        # user_warlock_health = user.warlock_inwork * 10
-        # user_warrior_attack = user.warrior_inwork * 10
-        # user_archer_attack = user.archer_inwork * 20
-        # user_warlock_attack = user.warlock_inwork * 30
 
-        # user_sum_attack = user_warrior_attack + user_archer_attack + user_warlock_attack
-
-        # enemy_warrior_health = enemy.warrior_inwork * 30
-        # enemy_archer_health = enemy.archer_inwork * 20
-        # enemy_warlock_health = enemy.warlock_inwork * 10
-        # enemy_warrior_attack = enemy.warrior_inwork * 10
-        # enemy_archer_attack = enemy.archer_inwork * 20
-        # enemy_warlock_attack = enemy.warlock_inwork * 30
-
-        # enemy_sum_attack = enemy_warrior_attack + enemy_archer_attack + enemy_warlock_attack
-
-        # user_warrior_after = user_warrior_health - enemy_sum_attack
-        # user_archer_after = user_archer_health + user_warrior_after
-        # user_warlock_after = user_warlock_health + user_archer_after
-
-        # enemy_warrior_after = enemy_warrior_health - user_sum_attack
-        # enemy_archer_after = enemy_archer_health + enemy_warrior_after
-        # enemy_warlock_after = enemy_warlock_health + enemy_archer_after
-
-        user_army = user.warrior_inwork + user.archer_inwork + user.warlock_inwork
-        enemy_army = enemy.warrior_inwork + enemy.archer_inwork + enemy.warlock_inwork
+        user_army = user.warrior_inwork# + user.archer_inwork + user.warlock_inwork
+        enemy_army = enemy.warrior_inwork# + enemy.archer_inwork + enemy.warlock_inwork
 
         delta = user_army - enemy_army
         reward = None
@@ -70,8 +42,15 @@ class War:
         else:
             win = False
         
-        user_warrior_die, user_archer_die, user_warlock_die = self.get_dead(user, enemy_army)
-        enemy_warrior_die, enemy_archer_die, enemy_warlock_die = self.get_dead(enemy, user_army)
+        # user_warrior_die, user_archer_die, user_warlock_die = self.get_dead(user, enemy_army)
+        # enemy_warrior_die, enemy_archer_die, enemy_warlock_die = self.get_dead(enemy, user_army)
+
+        user_warrior_die = self.get_dead_war(user, enemy_army)
+        enemy_warrior_die = self.get_dead_war(enemy, user_army)
+
+        deads = None
+        if user_warrior_die < user.warrior_inwork and enemy_warrior_die == enemy.warrior_inwork:
+            deads = self.get_dead_citizens(user_warrior_die < user.warrior_inwork, enemy)
 
         data = {
             'attack_warrior': user.warrior_inwork,
@@ -87,13 +66,19 @@ class War:
             # 'defender_archer_die': enemy_archer_die,
             # 'defender_warlock_die': enemy_warlock_die 
         }
+
+        if deads:
+            data["attack_warrior_die"] += deads["warrior"]
+            del deads["warrior"]
+            for key in deads:
+                data[key] = deads[key]
         
-        user.citizens -= user_warrior_die + user_archer_die + user_warlock_die
+        user.citizens -= user_warrior_die# + user_archer_die + user_warlock_die
         user.warrior_inwork -= user_warrior_die
         # user.archer_inwork -= user_archer_die
         # user.warlock_inwork -= user_warlock_die
 
-        enemy.citizens -= enemy_warrior_die + enemy_archer_die + enemy_warlock_die
+        enemy.citizens -= enemy_warrior_die# + enemy_archer_die + enemy_warlock_die
         enemy.warrior_inwork -= enemy_warrior_die
         # enemy.archer_inwork -= enemy_archer_die
         # enemy.warlock_inwork -= enemy_warlock_die
@@ -101,6 +86,57 @@ class War:
         battle = await Battle.create(attack=user.user, defender=enemy.user, attack_vk_id=user.user.vk_id, defender_vk_id=enemy.user.vk_id, time=int(datetime.datetime.utcnow().timestamp()), win=win, data=data, reward=reward)
         return await BattlePydanic.from_tortoise_orm(battle)
         
+
+    def get_dead_war(self, user: UserData, enemy_army: int):
+        war = user.warrior_inwork - enemy_army
+        if war < 0:
+            war_die = user.warrior_inwork
+        else:
+            war_die = user.warrior_inwork - war
+        return war_die
+
+    def get_dead_citizens(self, warriors, enemy):
+        deads = {
+            'warriors': 0
+        }
+        if enemy.citizens == 0:
+            return None
+        
+        if enemy.citizens_free > 0:
+            free_dead = max(enemy.citizens_free - warriors*2, 0)
+            deads["free"] = free_dead
+            warriors -= free_dead / 2
+            deads['warriors'] += round(warriors)
+            if warriors <= 0:
+                return deads
+        
+        if enemy.smith_inwork > 0:
+            smith_dead = max(enemy.smith_inwork - warriors*2, 0)
+            deads["smith"] = smith_dead
+            warriors -= smith_dead / 2
+            deads['warriors'] += round(warriors)
+            if warriors <= 0:
+                return deads
+        
+        if enemy.wood_inwork > 0:
+            wood_dead = max(enemy.wood_inwork - warriors*2, 0)
+            deads["wood"] = wood_dead
+            warriors -= wood_dead / 2
+            deads['warriors'] += round(warriors)
+            if warriors <= 0:
+                return deads
+        
+        if enemy.stone_inwork > 0:
+            stone_dead = max(enemy.stone_inwork - warriors*2, 0)
+            deads["stone"] = stone_dead
+            warriors -= stone_dead / 2
+            deads['warriors'] += round(warriors)
+            if warriors <= 0:
+                return deads
+        
+        return deads
+        
+            
 
     def get_dead(self, user: UserData, enemy_army: int):
         war = user.warrior_inwork - enemy_army
