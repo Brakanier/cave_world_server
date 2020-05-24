@@ -104,8 +104,8 @@ class War:
         if enemy.citizens == 0:
             return None
         
-        if enemy.citizens_free() > 0:
-            free_dead = min(warriors*2, enemy.citizens_free())
+        if enemy.citizens_free() >= 1:
+            free_dead = min(warriors*2, int(enemy.citizens_free()))
             deads["free"] = free_dead
             enemy.citizens -= free_dead
             warriors -= free_dead / 2
