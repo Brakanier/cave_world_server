@@ -16,7 +16,7 @@ class War:
         limit = 3
         #offset = random.randint(0, count - limit)
         #return await UserData.all().values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
-        return await UserData.exclude(user__id=user_id).filter(warrior_inwork__gt=0).order_by('-last_defend').all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
+        return await UserData.exclude(user__id=user_id).order_by('-last_defend').all().limit(limit).values('level', 'trophy','terrain', 'user__vk_id', 'user__id', 'user__nickname')
 
     async def attack(self, user: User, enemy: User):
         user_user, user = user, user.data
