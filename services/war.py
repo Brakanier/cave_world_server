@@ -53,6 +53,7 @@ class War:
         deads = None
         if user_warrior_die < user.warrior_inwork and enemy_warrior_die == enemy.warrior_inwork:
             deads = self.get_dead_citizens(user_warrior_die < user.warrior_inwork, enemy)
+            print(deads)
 
         data = {
             'attack_warrior': user.warrior_inwork,
