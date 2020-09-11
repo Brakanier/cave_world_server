@@ -12,4 +12,4 @@ class Battle(models.Model):
     reward = fields.JSONField(null=True)
         
     
-BattlePydanic = pydantic_model_creator(Battle, name="Battle", exclude=['id'])
+BattlePydanic = pydantic_model_creator(Battle, name="Battle", exclude=('id',))

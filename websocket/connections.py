@@ -16,7 +16,7 @@ class UserConnect():
 
 async def connections_process(connections, notify) -> None:
     while True:
-        print(len(connections))
+        #print(len(connections))
         for user_id in connections:
             data = connections[user_id].user.data
             await data.processing()

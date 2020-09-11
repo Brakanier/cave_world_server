@@ -15,12 +15,12 @@ import logging
 
 from starlette.middleware.cors import CORSMiddleware
 from starlette import status
-from starlette.routing import WebSocketRoute
 
 import datetime
 
 app = FastAPI()
 app.add_websocket_route("/ws/{token}", websocket.EndPoint)
+app.add_websocket_route("/ws-battle", websocket.BattleEndPoint)
 
 app.add_middleware(
     CORSMiddleware,

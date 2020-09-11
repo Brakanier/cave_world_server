@@ -16,7 +16,7 @@ class EndPoint(WebSocketEndpoint):
             await websocket.close()
             return
         
-        user = await models.User.filter(token=self.scope['path_params']['token']).prefetch_related('data').get_or_none()
+        user = await models.User.filter(token=self.scope['path_params']['token']).prefetch_related('data', 'items').get_or_none()
         if not user:
             await websocket.close()
             return
@@ -27,6 +27,7 @@ class EndPoint(WebSocketEndpoint):
 
         await connections.add(UserConnect(user, websocket))
         await connections.notify(user.id, {'type': 'sync', 'data': send_data.dict()})
+        await connections.notify(user.id, {'type': 'items', 'items': user.items})
     
     async def on_receive(self, websocket: WebSocket, data: dict):
         user_connect = connections.find(websocket.user_id)

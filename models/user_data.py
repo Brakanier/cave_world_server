@@ -3,7 +3,6 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 
 import datetime
 
-
 class UserData(models.Model):
     """UserData model"""
 
@@ -18,6 +17,9 @@ class UserData(models.Model):
     energy = fields.FloatField(default=30)
     terrain = fields.IntField(default=30)
     trophy = fields.IntField(default=0)
+
+    # Крафт и предметы
+    items = fields.JSONField(default=[])
 
     # Ресурсы
     gold = fields.IntField(default=0)

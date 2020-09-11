@@ -11,7 +11,7 @@ class Users:
     def __init__(self):
         pass
 
-    async def get_or_create_vk(self, vk_id) -> str: 
+    async def get_or_create_vk(self, vk_id) -> User: 
         user = await User.filter(vk_id=vk_id).get_or_none()
 
         if user:

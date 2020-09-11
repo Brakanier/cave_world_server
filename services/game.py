@@ -9,6 +9,7 @@ from models import User, UserData, UserDataPydanic, Battle
 from .builds import Builds
 from .citizens import Citizens
 from .war import War
+from .craft import Craft
 
 class Game:
     def __init__(self, find, notify):
@@ -17,6 +18,7 @@ class Game:
         self.build = Builds()
         self.citizen = Citizens()
         self.war = War()
+        self.craft = Craft()
     
     async def action(self, user_id: int, data: dict):
         user_connect = self.find(user_id)
@@ -29,7 +31,12 @@ class Game:
             await self.extract(user.data, 'wood')
         elif data["action"] == 'stone':
             await self.extract(user.data, 'stone')
-        
+
+        elif data["action"] == 'craft':
+            result = await self.craft.craft(user, data["item"])
+            if result:
+                self.send(user.id, 'items', user.items)
+
         elif data["action"] == 'hut':
             await self.build.hut(user.data)
         elif data["action"] == 'house':
